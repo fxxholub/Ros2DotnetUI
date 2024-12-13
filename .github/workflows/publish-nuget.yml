@@ -38,7 +38,7 @@ jobs:
           --output ./artifacts \
           -p:PackageVersion=${{ env.VERSION }} \
           -p:PackageReadmeFile=${{ github.workspace }}/README.md
-      working-directory: ${{ github.workspace }}
+
 
     - name: Publish to NuGet
       env:
