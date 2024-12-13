@@ -1,0 +1,324 @@
+@*
+    Joystick JS wrapper
+    Author: Jan Holub
+    Email: fxxholub@gmail.com
+    Based on: https://codepen.io/jiffy/pen/zrqwON
+
+    Dependencies:
+        <script src="_content/Ros2DotnetUI.Library/js/jquery-3.7.1.min.js"></script>
+        <script src="_content/Ros2DotnetUI.Library/js/createjs.min.js"></script>
+        <script src="_content/Ros2DotnetUI.Library/js/hammer.min.js"></script>
+   
+        
+    Usage:
+        <Joystick
+           OnJoystickStart="@HandleJoystickStartLeft"
+           OnJoystickMove="@HandleJoystickMoveLeft"
+           OnJoystickStop="@HandleJoystickStopLeft">
+           <TopIcon><IconComponent IconUrl="appicons/custom/chevron-up.svg" Width="24px"/></TopIcon>
+           <BottomIcon><IconComponent IconUrl="appicons/custom/chevron-down.svg" Width="24px"/></BottomIcon>
+           <LeftIcon><IconComponent IconUrl="appicons/custom/arrow-rotate-left.svg" Width="20px"/></LeftIcon>
+           <RightIcon><IconComponent IconUrl="appicons/custom/arrow-rotate-right.svg" Width="20px"/></RightIcon>
+        </Joystick>
+*@
+
+@using Microsoft.JSInterop
+@implements IDisposable
+@inject IJSRuntime JSRuntime
+
+<div class="noselect">
+    <div class="container joystick-wrapper">
+        <!-- Joystick Canvas -->
+        <div class="center-align">
+            <canvas id="joystick_@objId" height="250" width="250"></canvas>
+        </div>
+
+        <!-- SVG Icons -->
+        <div class="joystick-icon top @((Disabled == true || DisabledY) ? "disabled-icon" : "")">
+            @TopIcon
+        </div>
+        <div class="joystick-icon bottom @((Disabled == true || DisabledY) ? "disabled-icon" : "")">
+            @BottomIcon
+        </div>
+        <div class="joystick-icon left @((Disabled == true || DisabledX) ? "disabled-icon" : "")">
+            @LeftIcon
+        </div>
+        <div class="joystick-icon right @((Disabled == true || DisabledX) ? "disabled-icon" : "")">
+            @RightIcon
+        </div>
+    </div>
+</div>
+
+<style>
+
+    .joystick-wrapper {
+        position: relative;
+        width: 250px;
+        height: 250px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #joystick_@objId {
+        height: 250px;
+        width: 250px;
+        border-radius: 50%;
+        background-color: #ff2f2f;
+        cursor: all-scroll;
+        user-select: none;
+        position: relative;
+    }
+    
+    .joystick-icon {
+        position: absolute;
+        width: auto;
+        height: auto;
+        
+    }
+    
+    .joystick-icon.top {
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%); /* Center horizontally */
+    }
+    
+    .joystick-icon.bottom {
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%); /* Center horizontally */
+    }
+    
+    .joystick-icon.left {
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%); /* Center vertically */
+    }
+    
+    .joystick-icon.right {
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%); /* Center vertically */
+    }
+    
+    .disabled-icon {
+        filter: grayscale(100%);
+        opacity: 0.2;
+    }
+</style>
+
+<script>
+    // cleanup globally stored dotnet object refs
+    function removeJoystickRef(dotnetObjId) {
+        delete window.joystickRefs[dotnetObjId];
+    }
+
+    // called on render
+    function initJoystick(dotnetObjRef, dotnetObjId) {
+        // globaly store dotnet object ref under dotnet obj id
+        window.joystickRefs = window.joystickRefs || {};
+        window.joystickRefs[dotnetObjId] = dotnetObjRef;
+        
+        // create outer circle
+        var xCenter = 250/2;
+        var yCenter = 250/2;
+        var stage = new createjs.Stage('joystick_'+dotnetObjId);
+
+        // Create movable inner circle
+        var psp = new createjs.Shape();
+        psp.alpha = 0.25;
+        psp.graphics.beginFill('#333333').drawCircle(xCenter, yCenter, 250/6);
+
+        // Add inner circle (psp) to stage
+        stage.addChild(psp);
+        createjs.Ticker.framerate = 120;
+        createjs.Ticker.addEventListener('tick', stage);
+        stage.update();
+
+        // create Hammer instance
+        var myElement = $('#joystick_' + dotnetObjId)[0];
+        var mc = new Hammer(myElement);
+        // by default, it only adds horizontal recognizers, see the docu: https://hammerjs.github.io/getting-started/
+        // but i have enabled all directions:
+        mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
+
+        // Hammer listens to gesture events:
+        // start event on touch (press)
+        var press_started = false;
+        mc.on("press", function (ev) {
+            press_started = true;
+            // notify C#
+            dotnetObjRef.invokeMethodAsync("InteropJoystickStart");
+            
+            xCenter = psp.x;
+            yCenter = psp.y;
+            psp.alpha = 0.5;
+            
+            stage.update();
+        });
+        // initialize the pan
+        mc.on("panstart", function (ev) {
+            xCenter = psp.x;
+            yCenter = psp.y;
+            //psp.alpha = 0.5;
+            stage.update();
+        });
+        // move event on pan move
+        mc.on("panmove", function (ev) {
+            if (press_started) {
+                // joystick position, including the limit
+                let coords = calculateCoords(ev.angle, ev.distance);
+
+                // notify C#
+                dotnetObjRef.invokeMethodAsync("InteropJoystickMove", coords.x, coords.y);
+
+                // move the inner circle
+                psp.x = coords.x;
+                psp.y = coords.y;
+                //psp.alpha = 0.5;
+
+                stage.update();
+            }
+        });
+        // stop event on pan end
+        mc.on("panend", function (ev) {
+            press_started = false;
+            // notify C#
+            dotnetObjRef.invokeMethodAsync("InteropJoystickStop");
+            
+            // center the inner circle
+            psp.alpha = 0.25;
+            createjs.Tween.get(psp).to({ x: xCenter, y: yCenter }, 750, createjs.Ease.elasticOut);
+        });
+        // stop event on press release
+        mc.on("pressup", function (ev) {
+            press_started = false;
+            // notify C#
+            dotnetObjRef.invokeMethodAsync("InteropJoystickStop");
+
+            // center the inner circle
+            psp.alpha = 0.25;
+            createjs.Tween.get(psp).to({ x: xCenter, y: yCenter }, 750, createjs.Ease.elasticOut);
+        });
+
+        addDoubleClickListeners();
+    }
+
+    // helper function
+    function calculateCoords(angle, distance) {
+        let coords = {};
+        // limit the distance to 100%
+        distance = Math.min(distance, 100);
+        let rads = (angle * Math.PI) / 180.0;
+
+        coords.x = distance * Math.cos(rads);
+        coords.y = distance * Math.sin(rads);
+
+        return coords;
+    }
+    
+    // register double click listener for all icons
+    function addDoubleClickListeners() {
+        document.querySelectorAll(".joystick-icon").forEach(icon => {
+            icon.removeEventListener("dblclick", handleDoubleClick);
+            icon.addEventListener("dblclick", handleDoubleClick);
+        });
+    }
+
+    // notify C# about icon double click -> toggle axis disability
+    function handleDoubleClick(event) {
+        const axis = this.classList.contains("top") || this.classList.contains("bottom") ? "y" : "x";
+        
+        const objId = this.closest(".joystick-wrapper").querySelector("canvas").id.replace('joystick_', '');
+
+        const objRef = window.joystickRefs[objId];
+        if (objRef) {
+            objRef.invokeMethodAsync("InteropToggleAxis", axis);
+        } else {
+            console.error(`Joystick reference for ID ${objId} not found.`);
+        }
+    }
+
+
+</script>
+
+@code {
+    [Parameter] public EventCallback OnJoystickStart{ get; set; }
+    [Parameter] public EventCallback<(float, float)> OnJoystickMove { get; set; }
+    [Parameter] public EventCallback OnJoystickStop { get; set; }
+    
+    [Parameter] public RenderFragment? TopIcon { get; set; }
+    [Parameter] public RenderFragment? BottomIcon { get; set; }
+    [Parameter] public RenderFragment? LeftIcon { get; set; }
+    [Parameter] public RenderFragment? RightIcon { get; set; }
+    
+    [Parameter] public bool? Disabled { get; set; }
+    [Parameter] public bool? DisabledToggleX { get; set; }
+    [Parameter] public bool? DisabledToggleY { get; set; }
+    
+    private bool DisabledX { get; set; } = false;
+    private bool DisabledY { get; set; } = false;
+
+    // create Joystick object reference for JS
+    private DotNetObjectReference<Joystick> objRef;
+    private string objId { get; set; }
+    private string GetUniqueIdFromObjRef(DotNetObjectReference<Joystick> objRef)
+    {
+        return $"{objRef.GetHashCode()}_{DateTimeOffset.UtcNow.Ticks}";
+    }
+    protected override void OnInitialized()
+    {
+        objRef = DotNetObjectReference.Create(this);
+        objId = GetUniqueIdFromObjRef(objRef);
+    }
+
+    // init JS joystick
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("initJoystick", objRef, objId);
+        }
+    }
+
+    // joystick JS events handlers
+    [JSInvokable]
+    public async void InteropJoystickStart()
+    {
+        await OnJoystickStart.InvokeAsync();
+    }
+    [JSInvokable]
+    public async void InteropJoystickMove(float x, float y)
+    {
+        float moveX = (Disabled == true || DisabledX) ? 0 : x;
+        float moveY = (Disabled == true || DisabledY) ? 0 : y;
+        await OnJoystickMove.InvokeAsync((moveX, moveY));
+    }
+    [JSInvokable]
+    public async void InteropJoystickStop()
+    {
+        await OnJoystickStop.InvokeAsync();
+    }
+    
+    // axis JS disability toggle handler
+    [JSInvokable]
+    public void InteropToggleAxis(string axis)
+    {
+        if (axis == "x" && DisabledToggleX != true)
+        {
+            DisabledX = !DisabledX;
+        }
+        else if (axis == "y" && DisabledToggleY != true)
+        {
+            DisabledY = !DisabledY;
+        }
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        JSRuntime.InvokeVoidAsync("removeJoystickRef", objId);
+        objRef?.Dispose();
+    }
+}
