@@ -30,7 +30,7 @@
     <div class="container joystick-wrapper">
         <!-- Joystick Canvas -->
         <div class="center-align">
-            <canvas id="joystick_@objId" height="250" width="250"></canvas>
+            <canvas id="joystick_@objId" height="250" width="250" style="background-color: @Color;"></canvas>
         </div>
 
         <!-- SVG Icons -->
@@ -65,7 +65,6 @@
         height: 250px;
         width: 250px;
         border-radius: 50%;
-        background-color: #ff2f2f;
         cursor: all-scroll;
         user-select: none;
         position: relative;
@@ -256,6 +255,9 @@
     [Parameter] public bool? Disabled { get; set; }
     [Parameter] public bool? DisabledToggleX { get; set; }
     [Parameter] public bool? DisabledToggleY { get; set; }
+    
+    [Parameter]
+    public string Color { get; set; } = "#2874A6";
     
     private bool DisabledX { get; set; } = false;
     private bool DisabledY { get; set; } = false;
