@@ -19,20 +19,25 @@ jobs:
         dotnet-version: '8.x'
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore src/Ros2DotnetUI.Library/Ros2DotnetUI.Library.csproj
 
     - name: Build the project
-      run: dotnet build --configuration Release --no-restore
-
-    - name: Pack the project
-      run: dotnet pack --configuration Release --no-restore --no-build -o ./artifacts
+      run: dotnet build src/Ros2DotnetUI.Library/Ros2DotnetUI.Library.csproj --configuration Release --no-restore
 
     - name: Set version dynamically
       id: get_version
       run: |
         VERSION=$(date +"%Y.%m.%d.%H%M")
-        echo "##[set-output name=version;]$VERSION"
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
       shell: bash
+
+    - name: Pack the project
+      run: |
+        dotnet pack src/Ros2DotnetUI.Library/Ros2DotnetUI.Library.csproj \
+          --configuration Release \
+          --output ./artifacts \
+          -p:PackageVersion=${{ env.VERSION }} \
+          -p:PackageReadmeFile=../../README.md
 
     - name: Publish to NuGet
       env:
@@ -41,5 +46,3 @@ jobs:
         dotnet nuget push ./artifacts/*.nupkg \
           --source https://api.nuget.org/v3/index.json \
           --api-key $NUGET_API_KEY
-        sed -i "s/<Version>.*<\/Version>/<Version>${{ steps.get_version.outputs.version }}<\/Version>/" ./Ros2DotnetUI.Library.csproj
-        dotnet pack --configuration Release --no-restore --no-build --output ./artifacts
