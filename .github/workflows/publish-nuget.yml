@@ -36,7 +36,8 @@ jobs:
         dotnet pack src/Ros2DotnetUI.Library/Ros2DotnetUI.Library.csproj \
           --configuration Release \
           --output ./artifacts \
-          -p:PackageVersion=${{ env.VERSION }}
+          -p:PackageVersion=${{ env.VERSION }} \
+          -p:PackageReadmeFile=./README.md
 
     - name: Publish to NuGet
       env:
