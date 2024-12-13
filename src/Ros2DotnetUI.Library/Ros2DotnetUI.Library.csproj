@@ -12,6 +12,7 @@
         <Description>Dotnet Razor UI component library for ROS2 use cases</Description>
         <Copyright>Copyright © 2024</Copyright>
         <RepositoryUrl>https://github.com/fxxholub/Ros2DotnetUI</RepositoryUrl>
+        <PackageReadmeFile>../../README.md</PackageReadmeFile>
         <PackageTags>ROS2;Blazor;Library;RCL;WASM</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/fxxholub/Ros2DotnetUI</PackageProjectUrl>
