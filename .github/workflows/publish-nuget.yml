@@ -37,7 +37,7 @@ jobs:
           --configuration Release \
           --output ./artifacts \
           -p:PackageVersion=${{ env.VERSION }} \
-          -p:PackageReadmeFile=${{ github.workspace }}/README.md
+          -p:PackageReadmeFile=./README.md
 
 
     - name: Publish to NuGet
