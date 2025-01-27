@@ -1,4 +1,12 @@
-﻿@inherits LayoutComponentBase
+﻿@using MudBlazor
+@inherits LayoutComponentBase
+
+@* MudBlazor dependencies *@
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
 <div class="page">
     <div class="sidebar">
         <NavMenu/>
@@ -14,3 +22,4 @@
         </article>
     </main>
 </div>
+

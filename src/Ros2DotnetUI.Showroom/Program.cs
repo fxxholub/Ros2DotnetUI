@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using MudBlazor.Services;
 
 namespace Ros2DotnetUI.Showroom;
 
@@ -12,7 +13,11 @@ public class Program
         builder.RootComponents.Add<HeadOutlet>("head::after");
 
         builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+        
+        // MudBlazor dependencies
+        builder.Services.AddMudServices();
 
         await builder.Build().RunAsync();
     }
 }
+

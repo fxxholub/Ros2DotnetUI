@@ -1,0 +1,78 @@
+<MudButtonGroup Color="Color.Primary" Variant="Variant.Filled">
+    @if (CanConnect && !CanDisconnect)
+    {
+        <MudIconButton Icon="@Icons.Material.Rounded.Link" aria-label="connect"
+                       Disabled="Disabled"
+                       OnClick="OnConnectAction"/>
+    }
+    else if (!CanConnect && CanDisconnect)
+    {
+        <MudIconButton Icon="@Icons.Material.Rounded.LinkOff" aria-label="disconnect"
+                       Disabled="Disabled"
+                       OnClick="OnDisconnectAction"/>
+    }
+    else
+    {
+        <MudIconButton Icon="@Icons.Material.Rounded.Link" aria-label="connect-disabled"
+                       Disabled="true"/>
+    }
+
+    @if (CanStart && !CanEnd)
+    {
+        <MudIconButton Icon="@Icons.Material.Rounded.PlayArrow" aria-label="start"
+                       Disabled="Disabled"
+                       OnClick="OnStartAction"/>
+    }
+    else if (!CanStart && CanEnd)
+    {
+        <MudIconButton Icon="@Icons.Material.Rounded.Pause" aria-label="end"
+                       Disabled="Disabled"
+                       OnClick="OnEndAction"/>
+    }
+    else
+    {
+        <MudIconButton Icon="@Icons.Material.Rounded.PlayArrow" aria-label="start-disabled"
+                       Disabled="true"/>
+    }
+
+    <MudIconButton Icon="@Icons.Material.Rounded.Stop" aria-label="stop"
+                   Disabled="@(CanLeave == false || Disabled == true)"
+                   OnClick="OnLeaveAction"/>
+</MudButtonGroup>
+
+@code {
+    // Boolean parameters to indicate the state of each button
+    [Parameter]
+    public bool CanConnect { get; set; }
+
+    [Parameter]
+    public bool CanDisconnect { get; set; }
+
+    [Parameter]
+    public bool CanStart { get; set; }
+
+    [Parameter]
+    public bool CanEnd { get; set; }
+
+    [Parameter]
+    public bool CanLeave { get; set; }
+
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    // Actions to trigger for each button
+    [Parameter]
+    public Action? OnConnectAction { get; set; }
+
+    [Parameter]
+    public Action? OnDisconnectAction { get; set; }
+
+    [Parameter]
+    public Action? OnStartAction { get; set; }
+
+    [Parameter]
+    public Action? OnEndAction { get; set; }
+
+    [Parameter]
+    public Action? OnLeaveAction { get; set; }
+}

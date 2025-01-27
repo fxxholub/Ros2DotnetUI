@@ -1,0 +1,178 @@
+@page "/session-control"
+@using Ros2DotnetUI.Library
+
+<h1>Session Control</h1>
+
+<p>Component for session control - connection and session start/end/leave.</p>
+
+<hr />
+
+<h2>Dependencies</h2>
+<p>MudBlazor - <a href="https://mudblazor.com/getting-started/installation" target="_blank">docu and installation guide</a></p>
+
+<p></p>
+
+<hr />
+
+<h2>Usage</h2>
+
+<SessionControl
+    CanConnect="CanConnect"
+    CanDisconnect="CanDisconnect"
+    CanStart="CanStart"
+    CanEnd="CanEnd"
+    CanLeave="CanLeave"
+    Disabled="IsDisabled"
+    OnConnectAction="HandleConnect"
+    OnDisconnectAction="HandleDisconnect"
+    OnStartAction="HandleStart"
+    OnEndAction="HandleEnd"
+    OnLeaveAction="HandleLeave"
+/>
+
+<pre><code>
+&lt;SessionControl
+    CanConnect="CanConnect"
+    CanDisconnect="CanDisconnect"
+    CanStart="CanStart"
+    CanEnd="CanEnd"
+    CanLeave="CanLeave"
+    Disabled="IsDisabled"
+    OnConnectAction="HandleConnect"
+    OnDisconnectAction="HandleDisconnect"
+    OnStartAction="HandleStart"
+    OnEndAction="HandleEnd"
+    OnLeaveAction="HandleLeave"
+/&gt;
+
+@@code {
+    // State Flags
+    private bool CanConnect { get; set; } = true;
+    private bool CanDisconnect { get; set; } = false;
+    private bool CanStart { get; set; } = false;
+    private bool CanEnd { get; set; } = false;
+    private bool CanLeave { get; set; } = false;
+    private bool IsDisabled { get; set; } = false;
+
+    // Action Handlers
+    private void HandleConnect()
+    {
+        Console.WriteLine("Connect action triggered.");
+        CanConnect = false;
+        CanDisconnect = true;
+        CanStart = true;
+        CanEnd = false;
+        CanLeave = false;
+        StateHasChanged();
+    }
+
+    private void HandleDisconnect()
+    {
+        Console.WriteLine("Disconnect action triggered.");
+        CanConnect = true;
+        CanDisconnect = false;
+        CanStart = false;
+        CanEnd = false;
+        CanLeave = false;
+        StateHasChanged();
+    }
+
+    private void HandleStart()
+    {
+        Console.WriteLine("Start action triggered.");
+        CanConnect = false;
+        CanDisconnect = true;
+        CanStart = false;
+        CanEnd = true;
+        CanLeave = true;
+        StateHasChanged();
+    }
+
+    private void HandleEnd()
+    {
+        Console.WriteLine("End action triggered.");
+        CanConnect = false;
+        CanDisconnect = true;
+        CanStart = true;
+        CanEnd = false;
+        CanLeave = true;
+        StateHasChanged();
+    }
+
+    private void HandleLeave()
+    {
+        Console.WriteLine("Leave action triggered.");
+        CanConnect = false;
+        CanDisconnect = true;
+        CanStart = true;
+        CanEnd = false;
+        CanLeave = false;
+        StateHasChanged();
+    }
+</code></pre>
+
+@code {
+    // State Flags
+    private bool CanConnect { get; set; } = true;
+    private bool CanDisconnect { get; set; } = false;
+    private bool CanStart { get; set; } = false;
+    private bool CanEnd { get; set; } = false;
+    private bool CanLeave { get; set; } = false;
+    private bool IsDisabled { get; set; } = false;
+
+    // Action Handlers
+    private void HandleConnect()
+    {
+        Console.WriteLine("Connect action triggered.");
+        CanConnect = false;
+        CanDisconnect = true;
+        CanStart = true;
+        CanEnd = false;
+        CanLeave = false;
+        StateHasChanged();
+    }
+
+    private void HandleDisconnect()
+    {
+        Console.WriteLine("Disconnect action triggered.");
+        CanConnect = true;
+        CanDisconnect = false;
+        CanStart = false;
+        CanEnd = false;
+        CanLeave = false;
+        StateHasChanged();
+    }
+
+    private void HandleStart()
+    {
+        Console.WriteLine("Start action triggered.");
+        CanConnect = false;
+        CanDisconnect = true;
+        CanStart = false;
+        CanEnd = true;
+        CanLeave = true;
+        StateHasChanged();
+    }
+
+    private void HandleEnd()
+    {
+        Console.WriteLine("End action triggered.");
+        CanConnect = false;
+        CanDisconnect = true;
+        CanStart = true;
+        CanEnd = false;
+        CanLeave = true;
+        StateHasChanged();
+    }
+
+    private void HandleLeave()
+    {
+        Console.WriteLine("Leave action triggered.");
+        CanConnect = false;
+        CanDisconnect = true;
+        CanStart = true;
+        CanEnd = false;
+        CanLeave = false;
+        StateHasChanged();
+    }
+}

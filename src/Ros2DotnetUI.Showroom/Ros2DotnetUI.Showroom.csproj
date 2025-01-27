@@ -15,4 +15,8 @@
       <ProjectReference Include="..\Ros2DotnetUI.Library\Ros2DotnetUI.Library.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="wwwroot\icons\" />
+    </ItemGroup>
+
 </Project>
