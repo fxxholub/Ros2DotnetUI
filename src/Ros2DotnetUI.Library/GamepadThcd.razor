@@ -1,0 +1,174 @@
+@using Microsoft.JSInterop
+@inject IJSRuntime JSRuntime
+
+<div style="display: flex; gap: 5px; align-items: center;">
+    <Joystick Color="#5C6BC0"
+              OnJoystickStart="@HandleJoystickStartLeft"
+              OnJoystickMove="@HandleJoystickMoveLeft"
+              OnJoystickStop="@HandleJoystickStopLeft">
+        <TopIcon><MudIcon Icon="@Icons.Material.Rounded.KeyboardArrowUp" Color="Color.Default"/></TopIcon>
+        <BottomIcon><MudIcon Icon="@Icons.Material.Rounded.KeyboardArrowDown" Color="Color.Default"/></BottomIcon>
+        <LeftIcon><MudIcon Icon="@Icons.Material.Rounded.KeyboardArrowLeft" Color="Color.Default"/></LeftIcon>
+        <RightIcon><MudIcon Icon="@Icons.Material.Rounded.KeyboardArrowRight" Color="Color.Default"/></RightIcon>
+    </Joystick>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 40px;">
+        @if (IsThcdOk())
+        {
+        <MudIcon Icon="@Icons.Material.Rounded.CheckCircleOutline"
+                 Color="Color.Success"
+                 Size="Size.Large" />
+        }
+        else
+        {
+        <MudIcon Icon="@Icons.Material.Rounded.Close"
+                 Color="Color.Error"
+                 Size="Size.Large" />
+        }
+        <MudIcon Icon="@Icons.Material.Rounded.KeyboardCommandKey"
+                 Disabled="@(!_isCtrlPressed)"
+                 Color="Color.Primary"
+                 Size="Size.Large" />
+    </div>
+    <Joystick Color="#5C6BC0"
+              OnJoystickStart="@HandleJoystickStartRight"
+              OnJoystickMove="@HandleJoystickMoveRight"
+              OnJoystickStop="@HandleJoystickStopRight">
+        <LeftIcon><MudIcon Icon="@Icons.Material.Rounded.RotateLeft" Color="Color.Default" /></LeftIcon>
+        <RightIcon><MudIcon Icon="@Icons.Material.Rounded.RotateRight" Color="Color.Default" /></RightIcon>
+    </Joystick>
+</div>
+
+<script>
+    window.initializeKeyListeners = (dotNetRef) => {
+        window.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) { // Check for Ctrl or Command key
+                dotNetRef.invokeMethodAsync('HandleCtrlStart');
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (!e.ctrlKey && !e.metaKey) { // Check for Ctrl or Command key release
+                dotNetRef.invokeMethodAsync('HandleCtrlStop');
+            }
+        });
+    };
+</script>
+
+@code {
+    [Parameter] public EventCallback OnGamepadStart{ get; set; }
+    [Parameter] public EventCallback<(float, float, float, float)> OnGamepadMove { get; set; }
+    [Parameter] public EventCallback OnGamepadStop { get; set; }
+    
+    private bool _leftJoystickStarted = false;
+    private bool _rightJoystickStarted = false;
+    private bool _isCtrlPressed = false;
+
+    private float _leftX = 0;
+    private float _leftY = 0;
+    private float _rightX = 0;
+    private float _rightY = 0;
+    
+    private DotNetObjectReference<GamepadThcd>? _dotNetRef;
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("initializeKeyListeners", _dotNetRef);
+        }
+    }
+
+    private bool IsThcdOk()
+    {
+        if ((_leftJoystickStarted && _rightJoystickStarted) ||
+            (_isCtrlPressed && (_leftJoystickStarted || _rightJoystickStarted)))
+        {
+            return true;
+        }
+
+        return false;
+    }
+    
+    private async void HandleGamepadStart()
+    {
+        if (IsThcdOk())
+        {
+            Console.WriteLine("gamepad start");
+            await OnGamepadStart.InvokeAsync();
+        }
+        StateHasChanged();
+    }
+    private async void HandleGamepadMove()
+    {
+        if (IsThcdOk())
+        {
+            Console.WriteLine("gamepad move");
+            await OnGamepadMove.InvokeAsync((_leftX, _leftY, _rightX, _rightY));
+        }
+    }
+    private async void HandleGamepadStop()
+    {
+        Console.WriteLine("gamepad stop");
+        await OnGamepadStop.InvokeAsync();
+        StateHasChanged();
+    }
+    
+    private void HandleJoystickStartLeft()
+    {
+        _leftJoystickStarted = true;
+        HandleGamepadStart();
+    }
+    private void HandleJoystickMoveLeft((float x, float y) position)
+    {
+        _leftX = position.x;
+        _leftY = position.y;
+        HandleGamepadMove();
+    }
+    private void HandleJoystickStopLeft()
+    {
+        _leftX = 0;
+        _leftY = 0;
+        _leftJoystickStarted = false;
+        HandleGamepadStop();
+    }
+    
+    private void HandleJoystickStartRight()
+    {
+        _rightJoystickStarted = true;
+        HandleGamepadStart();
+    }
+    private void HandleJoystickMoveRight((float x, float y) position)
+    {
+        _rightX = position.x;
+        _rightY = position.y;
+        HandleGamepadMove();
+    }
+    private void HandleJoystickStopRight()
+    {
+        _rightX = 0;
+        _rightY = 0;
+        _rightJoystickStarted = false;
+        HandleGamepadStop();
+    }
+    
+    [JSInvokable]
+    public void HandleCtrlStart()
+    {
+        _isCtrlPressed = true;
+        StateHasChanged();
+    }
+    
+    [JSInvokable]
+    public void HandleCtrlStop()
+    {
+        _isCtrlPressed = false;
+        HandleGamepadStop();
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        _dotNetRef?.Dispose();
+    }
+}

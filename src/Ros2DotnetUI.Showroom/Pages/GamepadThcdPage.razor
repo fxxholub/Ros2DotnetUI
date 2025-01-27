@@ -1,0 +1,79 @@
+@page "/gamepad-thcd"
+@using System.Data.SqlTypes
+@using Ros2DotnetUI.Library
+
+<h1>Gamepad THCD</h1>
+
+<p>Two-hand control device gamepad ISO 13851 alike.</p>
+<p>Joystick-joystick or joystick-ctrl/command must be used at a time to produce signal output.</p>
+<p>Gamepad, same as joystick reacts on change. Does not send output cyclically.</p>
+
+<hr />
+
+<h2>Dependencies</h2>
+<p><a href="/joystick" target="_blank">Joystick</a></p>
+<p>MudBlazor - <a href="https://mudblazor.com/getting-started/installation" target="_blank">docu and installation guide</a></p>
+
+<hr />
+
+<h2>Basic usage</h2>
+
+<GamepadThcd
+    OnGamepadStart="HandleStart"
+    OnGamepadMove="HandleMove"
+    OnGamepadStop="HandleStop"
+    />
+
+<p>Output:</p>
+<textarea id="GamepadOutput" style="width: 100%; height: 100px;" readonly>@_output</textarea>
+
+<pre><code>
+&lt;GamepadThcd
+    OnGamepadStart="HandleStart"
+    OnGamepadMove="HandleMove"
+    OnGamepadStop="HandleStop"
+/&gt;
+
+@@code
+{
+    private string _output { get; set; } = "";
+
+    private void HandleStart()
+    {
+        _output += "started";
+    }
+
+    private void HandleMove((float lx, float ly, float rx, float ry) move)
+    {
+        _output += $"moved: [{move.lx}, {move.ly}, {move.rx}, {move.ry}]";
+    }
+
+    private void HandleStop()
+    {
+        _output += "stopped";
+    }
+}
+
+</code></pre>
+
+@code
+{
+    private string _output { get; set; } = "";
+
+    private void HandleStart()
+    {
+        _output += "started\n";
+    }
+    
+    private void HandleMove((float lx, float ly, float rx, float ry) move)
+    {
+        _output += $"moved: [{move.lx}, {move.ly}, {move.rx}, {move.ry}]\n";
+    }
+    
+    private void HandleStop()
+    {
+        _output += "stopped\n";
+    }
+}
+
+
