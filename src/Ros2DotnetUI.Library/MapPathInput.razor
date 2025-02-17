@@ -1,0 +1,119 @@
+@using System.Xml.Linq
+@using System.Text
+@using Microsoft.AspNetCore.Components.Forms
+@using MudBlazor
+
+<div style="display: flex; flex-direction: column; height: 100vh; gap: 15px;">
+    <div style="display: flex; gap: 10px; align-items: center; padding: 10px; background-color: #f5f5f5;">
+        <MudFileUpload T="IBrowserFile" Accept=".svg" FilesChanged="OnFileChanged">
+            <ActivatorContent>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Rounded.FileUpload">
+                    Upload
+                </MudButton>
+            </ActivatorContent>
+        </MudFileUpload>
+
+        <MudButton StartIcon="@Icons.Material.Rounded.Map" Variant="Variant.Filled" Color="Color.Primary"
+                   OnClick="OnSendMapClicked" Disabled="@string.IsNullOrEmpty(_map)">
+            Send Map
+        </MudButton>
+        <MudButton StartIcon="@Icons.Material.Rounded.Route" Variant="Variant.Filled" Color="Color.Primary"
+                   OnClick="OnSendPathClicked" Disabled="@string.IsNullOrEmpty(_path)">
+            Send Path
+        </MudButton>
+        <MudButton StartIcon="@Icons.Material.Rounded.PlayCircle" Variant="Variant.Filled" Color="Color.Tertiary" 
+                   OnClick="@(() => GoClicked.InvokeAsync(null))">
+            Go
+        </MudButton>
+        <MudButton StartIcon="@Icons.Material.Rounded.StopCircle" Variant="Variant.Filled" Color="Color.Error" 
+                   OnClick="@(() => StopClicked.InvokeAsync(null))">
+            Stop
+        </MudButton>
+    </div>
+
+    <div style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; border: 1px dashed gray; background-color: #fafafa; overflow: hidden;">
+        @if (!string.IsNullOrEmpty(_svgBase64))
+        {
+            <img src="@_svgBase64"
+                 alt="Uploaded Map"
+                 style="width: 100%; height: 100%; object-fit: contain;"
+                 class="rounded-lg ma-4" />
+        }
+        else
+        {
+            <span style="color: gray; font-size: 1.25rem;">Upload a Map with path</span>
+        }
+    </div>
+</div>
+
+@code {
+    private string? _svgBase64;
+    private string? _map;
+    private string? _path;
+
+    // Parameters to trigger events externally.
+    [Parameter] public EventCallback<string?> SendMapClicked { get; set; }
+    [Parameter] public EventCallback<string?> SendPathClicked { get; set; }
+    [Parameter] public EventCallback GoClicked { get; set; }
+    [Parameter] public EventCallback StopClicked { get; set; }
+
+    private async Task OnFileChanged(IBrowserFile file)
+    {
+        using var stream = file.OpenReadStream();
+        using var reader = new StreamReader(stream);
+        var content = await reader.ReadToEndAsync();
+
+        try
+        {
+            // Parse the SVG content.
+            var xdoc = XDocument.Parse(content);
+
+            // Extract the first <image> element.
+            var imageElement = xdoc.Descendants().FirstOrDefault(e => e.Name.LocalName == "image");
+            if (imageElement != null)
+            {
+                // xlink is typically defined in the "http://www.w3.org/1999/xlink" namespace.
+                XNamespace xlink = "http://www.w3.org/1999/xlink";
+                var hrefAttr = imageElement.Attribute(xlink + "href");
+                if (hrefAttr != null)
+                {
+                    _map = hrefAttr.Value;
+                }
+            }
+
+            // Extract the first <path> element's "d" attribute.
+            var pathElement = xdoc.Descendants().FirstOrDefault(e => e.Name.LocalName == "path");
+            if (pathElement != null)
+            {
+                var dAttr = pathElement.Attribute("d");
+                if (dAttr != null)
+                {
+                    _path = dAttr.Value;
+                }
+            }
+
+            // Convert the entire SVG content to a base64 data URL.
+            var svgBytes = Encoding.UTF8.GetBytes(content);
+            _svgBase64 = $"data:image/svg+xml;base64,{Convert.ToBase64String(svgBytes)}";
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error parsing SVG: {ex.Message}");
+            _svgBase64 = null;
+        }
+
+        StateHasChanged();
+    }
+    
+    private async Task OnSendMapClicked()
+    {
+        await SendMapClicked.InvokeAsync(_map);
+    }
+
+    private async Task OnSendPathClicked()
+    {
+        await SendPathClicked.InvokeAsync(_path);
+    }
+}

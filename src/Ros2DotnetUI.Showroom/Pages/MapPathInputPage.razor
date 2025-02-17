@@ -1,0 +1,105 @@
+@page "/map-path-input"
+@using System.Data.SqlTypes
+@using Ros2DotnetUI.Library
+
+<h1>Map path input</h1>
+<p>Viewer of a 2D map and a predefined path.</p>
+
+<hr />
+
+<h2>Dependencies</h2>
+<p>
+    MudBlazor - <a href="https://mudblazor.com/getting-started/installation" target="_blank">docu and installation guide</a>
+</p>
+
+<hr />
+
+<h2>Usage</h2>
+
+<pre><code>
+&lt;MapPathInput SendMapClicked="SendMap" SendPathClicked="SendPath" GoClicked="Go" StopClicked="Stop" /&gt;
+
+@@code {
+    private string? _map;
+    private string? _path;
+
+    private async Task SendMap(string? mapData)
+    {
+        Console.WriteLine($"Send Map clicked with data: {mapData}");
+        _map = mapData;
+        await Task.CompletedTask;
+    }
+
+    private async Task SendPath(string? pathData)
+    {
+        Console.WriteLine($"Send Path clicked with data: {pathData}");
+        _path = pathData;
+        await Task.CompletedTask;
+    }
+
+    private async Task Go()
+    {
+        Console.WriteLine("Go clicked");
+        await Task.CompletedTask;
+    }
+
+    private async Task Stop()
+    {
+        Console.WriteLine("Stop clicked");
+        await Task.CompletedTask;
+    }
+}
+</code></pre>
+
+<MapPathInput SendMapClicked="SendMap" SendPathClicked="SendPath" GoClicked="Go" StopClicked="Stop" />
+
+@if (!string.IsNullOrEmpty(_map) || !string.IsNullOrEmpty(_path))
+{
+    <div style="padding: 10px; background-color: #efefef; margin-top: 20px;">
+        @if (!string.IsNullOrEmpty(_map))
+        {
+            <div>
+                <strong>Map Data:</strong>
+                <pre>@_map</pre>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(_path))
+        {
+            <div>
+                <strong>Path Data:</strong>
+                <pre>@_path</pre>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private string? _map;
+    private string? _path;
+
+    private async Task SendMap(string? mapData)
+    {
+        Console.WriteLine($"Send Map clicked with data: {mapData}");
+        _map = mapData;
+        await Task.CompletedTask;
+    }
+
+    private async Task SendPath(string? pathData)
+    {
+        Console.WriteLine($"Send Path clicked with data: {pathData}");
+        _path = pathData;
+        await Task.CompletedTask;
+    }
+
+    private async Task Go()
+    {
+        Console.WriteLine("Go clicked");
+        await Task.CompletedTask;
+    }
+
+    private async Task Stop()
+    {
+        Console.WriteLine("Stop clicked");
+        await Task.CompletedTask;
+    }
+}
