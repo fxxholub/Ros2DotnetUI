@@ -30,7 +30,7 @@
     <div class="container joystick-wrapper">
         <!-- Joystick Canvas -->
         <div class="center-align">
-            <canvas id="joystick_@objId" height="250" width="250" style="background-color: @Color;"></canvas>
+            <canvas id="joystick_@objId" height="220" width="220" style="background-color: @Color;"></canvas>
         </div>
 
         <!-- SVG Icons -->
@@ -53,8 +53,8 @@
 
     .joystick-wrapper {
         position: relative;
-        width: 250px;
-        height: 250px;
+        width: 220px;
+        height: 220px;
         margin: 0 auto;
         display: flex;
         justify-content: center;
@@ -62,8 +62,8 @@
     }
 
     #joystick_@objId {
-        height: 250px;
-        width: 250px;
+        height: 220px;
+        width: 220px;
         border-radius: 50%;
         cursor: all-scroll;
         user-select: none;
@@ -120,14 +120,14 @@
         window.joystickRefs[dotnetObjId] = dotnetObjRef;
         
         // create outer circle
-        var xCenter = 250/2;
-        var yCenter = 250/2;
+        var xCenter = 220/2;
+        var yCenter = 220/2;
         var stage = new createjs.Stage('joystick_'+dotnetObjId);
 
         // Create movable inner circle
         var psp = new createjs.Shape();
         psp.alpha = 0.25;
-        psp.graphics.beginFill('#333333').drawCircle(xCenter, yCenter, 250/6);
+        psp.graphics.beginFill('#333333').drawCircle(xCenter, yCenter, 220/6);
 
         // Add inner circle (psp) to stage
         stage.addChild(psp);

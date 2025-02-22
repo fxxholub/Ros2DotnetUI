@@ -1,7 +1,7 @@
 @using Microsoft.JSInterop
 @inject IJSRuntime JSRuntime
 
-<div style="display: flex; gap: 5px; align-items: center;">
+<div style="display: flex; gap: 40px; align-items: center;">
     <Joystick Color="#5C6BC0"
               OnJoystickStart="@HandleJoystickStartLeft"
               OnJoystickMove="@HandleJoystickMoveLeft"
@@ -14,7 +14,7 @@
     <div style="display: flex; flex-direction: column; align-items: center; gap: 40px;">
         @if (IsThcdOk())
         {
-        <MudIcon Icon="@Icons.Material.Rounded.CheckCircleOutline"
+        <MudIcon Icon="@Icons.Material.Rounded.Check"
                  Color="Color.Success"
                  Size="Size.Large" />
         }
