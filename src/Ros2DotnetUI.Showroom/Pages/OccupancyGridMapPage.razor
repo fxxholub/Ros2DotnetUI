@@ -1,0 +1,38 @@
+@page "/occupancy-grid-map"
+@using System.Data.SqlTypes
+@using Ros2DotnetUI.Library
+
+<h1>Occupancy grid map</h1>
+
+<p>TODO</p>
+
+<hr />
+
+<h2>Dependencies</h2>
+<p>TODO</p>
+
+<hr />
+
+<h2>Usage</h2>
+
+<OccupancyGridMap GridData="@gridData" CellSize="20" />
+
+@code {
+private int[,] gridData;
+
+protected override void OnInitialized()
+{
+// Initialize sample grid data
+// -1: Unknown, 0: Free, 100: Occupied
+gridData = new int[,]
+{
+{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+{ 0, 100, 100, 100, 0, 0, 100, 100, 100, 0 },
+{ 0, 100, -1, 100, 0, 0, 100, -1, 100, 0 },
+{ 0, 100, 100, 100, 0, 0, 100, 100, 100, 0 },
+{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+// Add more rows as needed
+};
+}
+}
+
