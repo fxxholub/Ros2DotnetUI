@@ -7,7 +7,7 @@
     }
     else if (!CanConnect && CanDisconnect)
     {
-        <MudIconButton Icon="@Icons.Material.Rounded.LinkOff" aria-label="disconnect"
+        <MudIconButton Icon="@Icons.Material.Rounded.LinkOff" Color="Color.Error" aria-label="disconnect"
                        Disabled="Disabled"
                        OnClick="OnDisconnectAction"/>
     }
@@ -19,23 +19,23 @@
 
     @if (CanStart && !CanEnd)
     {
-        <MudIconButton Icon="@Icons.Material.Rounded.PlayArrow" aria-label="start"
+        <MudIconButton Icon="@Icons.Material.Rounded.PowerSettingsNew" aria-label="start"
                        Disabled="Disabled"
                        OnClick="OnStartAction"/>
     }
     else if (!CanStart && CanEnd)
     {
-        <MudIconButton Icon="@Icons.Material.Rounded.Pause" aria-label="end"
+        <MudIconButton Icon="@Icons.Material.Rounded.PowerSettingsNew" Color="Color.Error" aria-label="end"
                        Disabled="Disabled"
                        OnClick="OnEndAction"/>
     }
     else
     {
-        <MudIconButton Icon="@Icons.Material.Rounded.PlayArrow" aria-label="start-disabled"
+        <MudIconButton Icon="@Icons.Material.Rounded.PowerSettingsNew" aria-label="start-disabled"
                        Disabled="true"/>
     }
 
-    <MudIconButton Icon="@Icons.Material.Rounded.Stop" aria-label="stop"
+    <MudIconButton Icon="@Icons.Material.Rounded.Logout" aria-label="stop"
                    Disabled="@(CanLeave == false || Disabled == true)"
                    OnClick="OnLeaveAction"/>
 </MudButtonGroup>
